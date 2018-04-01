@@ -131,10 +131,10 @@
     <QtRcc Include="qtsipphone.qrc" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="QtSipPhone.rc" />
+    <ClInclude Include="csipaccount.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="csipaccount.h" />
+    <ResourceCompile Include="qtsipphone.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">

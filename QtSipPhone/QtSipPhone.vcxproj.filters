@@ -56,11 +56,11 @@
     </QtRcc>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="QtSipPhone.rc" />
-  </ItemGroup>
-  <ItemGroup>
     <ClInclude Include="csipaccount.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="qtsipphone.rc" />
   </ItemGroup>
 </Project>
