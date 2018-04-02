@@ -13,7 +13,9 @@ QtSipPhone::QtSipPhone(QWidget *parent)
 
 	connect(ui.actionCall2, &QAction::triggered, this, &QtSipPhone::callPhone2);
 
-	m_sipphone.init_sphone(5061);
+	m_sipphone.init_config();
+	
+	m_sipphone.init_sphone();
 }
 
 void QtSipPhone::exitApp()

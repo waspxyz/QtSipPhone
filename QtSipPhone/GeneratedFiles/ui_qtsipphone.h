@@ -43,7 +43,7 @@ public:
     {
         if (QtSipPhoneClass->objectName().isEmpty())
             QtSipPhoneClass->setObjectName(QStringLiteral("QtSipPhoneClass"));
-        QtSipPhoneClass->resize(600, 400);
+        QtSipPhoneClass->resize(761, 515);
         actionSet = new QAction(QtSipPhoneClass);
         actionSet->setObjectName(QStringLiteral("actionSet"));
         actionExit = new QAction(QtSipPhoneClass);
@@ -59,7 +59,7 @@ public:
         QtSipPhoneClass->setCentralWidget(centralWidget);
         menuBar = new QMenuBar(QtSipPhoneClass);
         menuBar->setObjectName(QStringLiteral("menuBar"));
-        menuBar->setGeometry(QRect(0, 0, 600, 26));
+        menuBar->setGeometry(QRect(0, 0, 761, 26));
         menu = new QMenu(menuBar);
         menu->setObjectName(QStringLiteral("menu"));
         menu_2 = new QMenu(menuBar);
