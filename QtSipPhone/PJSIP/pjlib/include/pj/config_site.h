@@ -19,6 +19,7 @@
  *   Windows Mobile, useful for testing purposes only.
  */
 
+#define PJ_CONFIG_MAXIMUM_SPEED
 
 /*
  * Typical configuration for WinCE target.

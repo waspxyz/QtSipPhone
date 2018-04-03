@@ -13,8 +13,10 @@ QtSipPhone::QtSipPhone(QWidget *parent)
 
 	connect(ui.actionCall2, &QAction::triggered, this, &QtSipPhone::callPhone2);
 
-	m_sipphone.init_config();
-	
+	connect(ui.actionPlay, &QAction::triggered, this, &QtSipPhone::playBack);
+
+	connect(ui.actionStop, &QAction::triggered, this, &QtSipPhone::stopPlay);
+
 	m_sipphone.init_sphone();
 }
 
@@ -31,4 +33,14 @@ void QtSipPhone::callPhone()
 void QtSipPhone::callPhone2()
 {
 	m_sipphone.reg_user(u8"100", u8"192.168.3.11", u8"100");
+}
+
+void QtSipPhone::playBack()
+{
+	m_sipphone.playback();
+}
+
+void QtSipPhone::stopPlay()
+{
+	m_sipphone.stopplayback();
 }

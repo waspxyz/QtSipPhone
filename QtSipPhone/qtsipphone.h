@@ -17,6 +17,10 @@ private:
 	void callPhone();
 
 	void callPhone2();
+
+	void playBack();
+
+	void stopPlay();
 	
 private:
 	Ui::QtSipPhoneClass ui;

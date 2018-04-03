@@ -5,6 +5,7 @@ cSipAccount* cSipAccount::cCurrentAcc = NULL;
 cSipAccount::cSipAccount()
 {
 	cCurrentAcc = this;
+	memset(&app_config, 0, sizeof(app_config));
 }
 
 void cSipAccount::error_log(const char* title, pj_status_t status)
@@ -132,7 +133,7 @@ void cSipAccount::incoming_call(pjsua_acc_id acc_id, pjsua_call_id call_id,
 	/* Start ringback */
 	ring_start(call_id);
 
-	pj_thread_sleep(3000);
+	pj_thread_sleep(8000);
 
 	// Auto Answer;
 	app_config.auto_answer = 200;
@@ -221,7 +222,7 @@ void cSipAccount::call_state(pjsua_call_id call_id, pjsip_event *e)
 				msg->body == NULL &&
 				call_info.media_status == PJSUA_CALL_MEDIA_NONE)
 			{
-				//ringback_start(call_id);
+				ringback_start(call_id);
 			}
 
 			PJ_LOG(3, ("cSipAccount", "Call %d state changed to %s (%d %.*s)",
@@ -386,14 +387,12 @@ void cSipAccount::on_call_audio_state(pjsua_call_info *ci, unsigned mi,
 /*
 * Handler when a transaction within a call has changed state.
 */
-void cSipAccount::call_tsx_state(pjsua_call_id call_id,
-	pjsip_transaction *tsx,
-	pjsip_event *e)
+void cSipAccount::call_tsx_state(pjsua_call_id call_id,	pjsip_transaction *tsx,	pjsip_event *e)
 {
 	const pjsip_method info_method =
 	{
 		PJSIP_OTHER_METHOD,
-	{ "INFO", 4 }
+		{ "INFO", 4 }
 	};
 
 	if (pjsip_method_cmp(&tsx->method, &info_method) == 0) {
@@ -431,14 +430,10 @@ void cSipAccount::call_tsx_state(pjsua_call_id call_id,
 		{
 			/* Status of outgoing INFO request */
 			if (tsx->status_code >= 200 && tsx->status_code < 300) {
-				PJ_LOG(4, ("cSipAccount",
-					"Call %d: DTMF sent successfully with INFO",
-					call_id));
+				PJ_LOG(4, ("cSipAccount", "Call %d: DTMF sent successfully with INFO", call_id));
 			}
 			else if (tsx->status_code >= 300) {
-				PJ_LOG(4, ("cSipAccount",
-					"Call %d: Failed to send DTMF with INFO: %d/%.*s",
-					call_id,
+				PJ_LOG(4, ("cSipAccount", "Call %d: Failed to send DTMF with INFO: %d/%.*s",	call_id,
 					tsx->status_code,
 					(int)tsx->status_text.slen,
 					tsx->status_text.ptr));
@@ -484,7 +479,8 @@ void cSipAccount::call_media_state(pjsua_call_id call_id)
 
 	pjsua_call_get_info(call_id, &call_info);
 
-	for (mi = 0; mi<call_info.media_cnt; ++mi) {
+	for (mi = 0; mi<call_info.media_cnt; ++mi)
+	{
 		on_call_generic_media_state(&call_info, mi, &has_error);
 
 		switch (call_info.media[mi].type) {
@@ -502,6 +498,23 @@ void cSipAccount::call_media_state(pjsua_call_id call_id)
 		pjsua_call_hangup(call_id, 500, &reason, NULL);
 	}
 
+}
+
+void cSipAccount::ringback_start(pjsua_call_id call_id)
+{
+	if (app_config.no_tones)
+		return;
+
+	if (app_config.call_data[call_id].ringback_on)
+		return;
+
+	app_config.call_data[call_id].ringback_on = PJ_TRUE;
+
+	if (++app_config.ringback_cnt == 1 &&
+		app_config.ringback_slot != PJSUA_INVALID_ID)
+	{
+		pjsua_conf_connect(app_config.ringback_slot, 0);
+	}
 }
 
 void cSipAccount::ring_start(pjsua_call_id call_id)
@@ -556,6 +569,19 @@ int cSipAccount::init_config()
 	// config the default
 	default_config();
 
+	app_config.log_cfg.log_filename = pj_str("./app.log");
+	app_config.log_cfg.level = 5;
+
+	// tone config
+	app_config.tones[app_config.tone_count].freq1 = RINGBACK_FREQ1;
+	app_config.tones[app_config.tone_count].freq2 = RINGBACK_FREQ2;
+	app_config.tones[app_config.tone_count].on_msec = RINGBACK_ON;
+	app_config.tones[app_config.tone_count].off_msec = RINGBACK_OFF;
+	++app_config.tone_count;
+
+	// wav file config
+	app_config.wav_files[app_config.wav_count++] = pj_str("./music.wav");
+
 	return 0;
 }
 
@@ -582,6 +608,9 @@ int cSipAccount::init_sphone()
 	app_config.pool = pjsua_pool_create("pjsua-app", 1000, 1000);
 	tmp_pool = pjsua_pool_create("tmp-pjsua", 1000, 1000);
 	
+	// load config
+	init_config();
+
 	/* Initialize application callbacks */
 	app_config.cfg.cb.on_call_state = &on_call_state;
 	app_config.cfg.cb.on_call_media_state = &on_call_media_state;
@@ -601,7 +630,6 @@ int cSipAccount::init_sphone()
 		pj_pool_release(tmp_pool);
 		error_exit(u8"pjsua_init()error", status);
 	}
-
 
 	/* Initialize calls data */
 	for (i = 0; i<PJ_ARRAY_SIZE(app_config.call_data); ++i) {
@@ -752,7 +780,6 @@ int cSipAccount::init_sphone()
 		}
 	}
 
-
 	/* Add UDP transport unless it's disabled. */
 	if (!app_config.no_udp) {
 		pjsua_acc_id aid;
@@ -857,5 +884,54 @@ int cSipAccount::reg_user(QString phone, QString domain, QString pwd)
 	}
 
 	//
+	return status;
+}
+
+
+int cSipAccount::playback()
+{
+	pjsua_call_info ci;
+	pjsua_call_get_info(current_call, &ci);
+
+	if (ci.media[0].status == PJSUA_CALL_MEDIA_ACTIVE ||
+		ci.media[0].status == PJSUA_CALL_MEDIA_REMOTE_HOLD)
+	{
+		pj_bool_t connect_sound = PJ_TRUE;
+		pj_bool_t disconnect_mic = PJ_FALSE;
+		pjsua_conf_port_id call_conf_slot;
+
+		call_conf_slot = ci.media[0].stream.aud.conf_slot;
+
+		/* Stream a file, if desired */
+		if (	app_config.wav_port != PJSUA_INVALID_ID)
+		{
+			pjsua_conf_connect(app_config.wav_port, call_conf_slot);
+			connect_sound = PJ_FALSE;
+		}
+	}
+
+	return PJ_SUCCESS;
+}
+
+int cSipAccount::stopplayback()
+{
+	pjsua_call_info ci;
+	pj_status_t status;
+	pjsua_call_get_info(current_call, &ci);
+
+	if (ci.media[0].status == PJSUA_CALL_MEDIA_ACTIVE ||
+		ci.media[0].status == PJSUA_CALL_MEDIA_REMOTE_HOLD)
+	{
+		pjsua_conf_port_id call_conf_slot;
+
+		call_conf_slot = ci.media[0].stream.aud.conf_slot;
+
+		/* Stream a file, if desired */
+		if (app_config.wav_port != PJSUA_INVALID_ID)
+		{
+			status = pjsua_conf_disconnect(app_config.wav_port, call_conf_slot);
+		}
+	}
+
 	return status;
 }

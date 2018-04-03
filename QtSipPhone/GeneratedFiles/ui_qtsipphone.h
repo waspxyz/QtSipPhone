@@ -31,6 +31,8 @@ public:
     QAction *actionCall1;
     QAction *actionCall2;
     QAction *actionAbout;
+    QAction *actionPlay;
+    QAction *actionStop;
     QWidget *centralWidget;
     QMenuBar *menuBar;
     QMenu *menu;
@@ -54,6 +56,10 @@ public:
         actionCall2->setObjectName(QStringLiteral("actionCall2"));
         actionAbout = new QAction(QtSipPhoneClass);
         actionAbout->setObjectName(QStringLiteral("actionAbout"));
+        actionPlay = new QAction(QtSipPhoneClass);
+        actionPlay->setObjectName(QStringLiteral("actionPlay"));
+        actionStop = new QAction(QtSipPhoneClass);
+        actionStop->setObjectName(QStringLiteral("actionStop"));
         centralWidget = new QWidget(QtSipPhoneClass);
         centralWidget->setObjectName(QStringLiteral("centralWidget"));
         QtSipPhoneClass->setCentralWidget(centralWidget);
@@ -82,6 +88,8 @@ public:
         menu->addAction(actionExit);
         menu_2->addAction(actionCall1);
         menu_2->addAction(actionCall2);
+        menu_2->addAction(actionPlay);
+        menu_2->addAction(actionStop);
         menu_3->addAction(actionAbout);
 
         retranslateUi(QtSipPhoneClass);
@@ -97,6 +105,8 @@ public:
         actionCall1->setText(QApplication::translate("QtSipPhoneClass", "\347\224\265\350\257\2351", nullptr));
         actionCall2->setText(QApplication::translate("QtSipPhoneClass", "\347\224\265\350\257\2352", nullptr));
         actionAbout->setText(QApplication::translate("QtSipPhoneClass", "\345\205\263\344\272\216", nullptr));
+        actionPlay->setText(QApplication::translate("QtSipPhoneClass", "\345\233\236\346\224\276", nullptr));
+        actionStop->setText(QApplication::translate("QtSipPhoneClass", "\345\201\234\346\255\242", nullptr));
         menu->setTitle(QApplication::translate("QtSipPhoneClass", "\346\226\207\344\273\266", nullptr));
         menu_2->setTitle(QApplication::translate("QtSipPhoneClass", "\345\267\245\345\205\267", nullptr));
         menu_3->setTitle(QApplication::translate("QtSipPhoneClass", "\345\270\256\345\212\251", nullptr));

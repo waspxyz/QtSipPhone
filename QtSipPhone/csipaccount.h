@@ -57,12 +57,12 @@ typedef struct pjsua_app_config
 	/* Compatibility with older pjsua */
 
 	unsigned		    codec_cnt;
-	pj_str_t		    codec_arg[32];
+	pj_str_t				codec_arg[32];
 	unsigned		    codec_dis_cnt;
-	pj_str_t                codec_dis[32];
+	pj_str_t				codec_dis[32];
 	pj_bool_t		    null_audio;
 	unsigned		    wav_count;
-	pj_str_t		    wav_files[32];
+	pj_str_t				wav_files[32];
 	unsigned		    tone_count;
 	pjmedia_tone_desc	    tones[32];
 	pjsua_conf_port_id	    tone_slots[32];
@@ -80,8 +80,8 @@ typedef struct pjsua_app_config
 	unsigned		    auto_answer;
 	unsigned		    duration;
 
-	float		    mic_level,
-		speaker_level;
+	float		    mic_level;
+	float			speaker_level;
 
 	int			    capture_dev, playback_dev;
 	unsigned		    capture_lat, playback_lat;
@@ -107,6 +107,8 @@ public:
 	int init_config();
     int init_sphone();
     int reg_user(QString phone, QString domain, QString pwd);
+	int playback();
+	int stopplayback();
 
 private:
     void error_exit(const char* title, pj_status_t status);
@@ -114,6 +116,7 @@ private:
     void default_config();
 	void ring_start(pjsua_call_id call_id);
 	void ring_stop(pjsua_call_id call_id);
+	void ringback_start(pjsua_call_id call_id);
 	void on_call_generic_media_state(pjsua_call_info *ci, unsigned mi,
 		pj_bool_t *has_error);
 	void on_call_audio_state(pjsua_call_info *ci, unsigned mi,

@@ -37,6 +37,8 @@
     </property>
     <addaction name="actionCall1"/>
     <addaction name="actionCall2"/>
+    <addaction name="actionPlay"/>
+    <addaction name="actionStop"/>
    </widget>
    <widget class="QMenu" name="menu_3">
     <property name="title">
@@ -80,6 +82,16 @@
   <action name="actionAbout">
    <property name="text">
     <string>关于</string>
+   </property>
+  </action>
+  <action name="actionPlay">
+   <property name="text">
+    <string>回放</string>
+   </property>
+  </action>
+  <action name="actionStop">
+   <property name="text">
+    <string>停止</string>
    </property>
   </action>
  </widget>
