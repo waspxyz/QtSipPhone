@@ -33,12 +33,10 @@
    </widget>
    <widget class="QMenu" name="menu_2">
     <property name="title">
-     <string>工具</string>
+     <string>电话工具</string>
     </property>
-    <addaction name="actionCall1"/>
-    <addaction name="actionCall2"/>
-    <addaction name="actionPlay"/>
-    <addaction name="actionStop"/>
+    <addaction name="action_regcall"/>
+    <addaction name="action_call"/>
    </widget>
    <widget class="QMenu" name="menu_3">
     <property name="title">
@@ -46,8 +44,18 @@
     </property>
     <addaction name="actionAbout"/>
    </widget>
+   <widget class="QMenu" name="menu_4">
+    <property name="title">
+     <string>语音工具</string>
+    </property>
+    <addaction name="actionPlay"/>
+    <addaction name="actionStop"/>
+    <addaction name="action_rec"/>
+    <addaction name="action_stoprec"/>
+   </widget>
    <addaction name="menu"/>
    <addaction name="menu_2"/>
+   <addaction name="menu_4"/>
    <addaction name="menu_3"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
@@ -69,14 +77,14 @@
     <string>退出</string>
    </property>
   </action>
-  <action name="actionCall1">
+  <action name="action_regcall">
    <property name="text">
-    <string>电话1</string>
+    <string>注册电话</string>
    </property>
   </action>
-  <action name="actionCall2">
+  <action name="action_call">
    <property name="text">
-    <string>电话2</string>
+    <string>拨打电话</string>
    </property>
   </action>
   <action name="actionAbout">
@@ -86,12 +94,22 @@
   </action>
   <action name="actionPlay">
    <property name="text">
-    <string>回放</string>
+    <string>语音播放</string>
    </property>
   </action>
   <action name="actionStop">
    <property name="text">
-    <string>停止</string>
+    <string>停止播放</string>
+   </property>
+  </action>
+  <action name="action_rec">
+   <property name="text">
+    <string>呼入录音</string>
+   </property>
+  </action>
+  <action name="action_stoprec">
+   <property name="text">
+    <string>停止录音</string>
    </property>
   </action>
  </widget>

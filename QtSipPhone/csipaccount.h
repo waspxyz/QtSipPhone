@@ -23,7 +23,6 @@
 
 #define PJSUA_APP_NO_LIMIT_DURATION	(int)0x7FFFFFFF
 
-
 typedef struct app_call_data
 {
 	pj_timer_entry	    timer;
@@ -63,11 +62,12 @@ typedef struct pjsua_app_config
 	pj_bool_t		    null_audio;
 	unsigned		    wav_count;
 	pj_str_t				wav_files[32];
+	pjsua_player_id	    wav_id[32];
+	pjsua_conf_port_id	    wav_port[32];
+
 	unsigned		    tone_count;
 	pjmedia_tone_desc	    tones[32];
 	pjsua_conf_port_id	    tone_slots[32];
-	pjsua_player_id	    wav_id;
-	pjsua_conf_port_id	    wav_port;
 	pj_bool_t		    auto_play;
 	pj_bool_t		    auto_play_hangup;
 	pj_timer_entry	    auto_hangup_timer;
@@ -109,6 +109,9 @@ public:
     int reg_user(QString phone, QString domain, QString pwd);
 	int playback();
 	int stopplayback();
+	int startrecord();
+	int stoprecord();
+	int makecall(QString url);
 
 private:
     void error_exit(const char* title, pj_status_t status);

@@ -69,9 +69,13 @@ void cSipAccount::default_config()
 	cfg->rtp_cfg.port = 4000;
 	cfg->redir_op = PJSIP_REDIRECT_ACCEPT_REPLACE;
 	cfg->duration = PJSUA_APP_NO_LIMIT_DURATION;
-	cfg->wav_id = PJSUA_INVALID_ID;
+
+	for (i = 0; i<PJ_ARRAY_SIZE(app_config.wav_id); ++i) {
+		cfg->wav_id[i] = PJSUA_INVALID_ID;
+		cfg->wav_port[i] = PJSUA_INVALID_ID;
+	}
+
 	cfg->rec_id = PJSUA_INVALID_ID;
-	cfg->wav_port = PJSUA_INVALID_ID;
 	cfg->rec_port = PJSUA_INVALID_ID;
 	cfg->mic_level = cfg->speaker_level = 1.0;
 	cfg->capture_dev = PJSUA_INVALID_ID;
@@ -133,7 +137,7 @@ void cSipAccount::incoming_call(pjsua_acc_id acc_id, pjsua_call_id call_id,
 	/* Start ringback */
 	ring_start(call_id);
 
-	pj_thread_sleep(8000);
+	pj_thread_sleep(4000);
 
 	// Auto Answer;
 	app_config.auto_answer = 200;
@@ -171,7 +175,10 @@ void cSipAccount::call_state(pjsua_call_id call_id, pjsip_event *e)
 		* since file is not looped
 		*/
 		if (app_config.auto_play_hangup)
-			pjsua_player_set_pos(app_config.wav_id, 0);
+		{
+			for(int i = 0; i < app_config.wav_count; i++)
+				pjsua_player_set_pos(app_config.wav_id[i], 0);
+		}
 
 
 		PJ_LOG(3, ("cSipAccount", "Call %d is DISCONNECTED [reason=%d (%s)]",
@@ -326,9 +333,9 @@ void cSipAccount::on_call_audio_state(pjsua_call_info *ci, unsigned mi,
 
 		/* Stream a file, if desired */
 		if ((app_config.auto_play || app_config.auto_play_hangup) &&
-			app_config.wav_port != PJSUA_INVALID_ID)
+			app_config.wav_port[0] != PJSUA_INVALID_ID)
 		{
-			pjsua_conf_connect(app_config.wav_port, call_conf_slot);
+			pjsua_conf_connect(app_config.wav_port[0], call_conf_slot);
 			connect_sound = PJ_FALSE;
 		}
 
@@ -581,6 +588,11 @@ int cSipAccount::init_config()
 
 	// wav file config
 	app_config.wav_files[app_config.wav_count++] = pj_str("./music.wav");
+	app_config.wav_files[app_config.wav_count++] = pj_str("./ringback.wav");
+
+	//
+	//app_config.auto_rec = PJ_TRUE;
+	//app_config.rec_file = pj_str("./record.wav");
 
 	return 0;
 }
@@ -653,10 +665,10 @@ int cSipAccount::init_sphone()
 			error_exit(u8"pjsua_player_create() error", status);
 		}
 
-		if (app_config.wav_id == PJSUA_INVALID_ID) 
+		if (app_config.wav_id[i] == PJSUA_INVALID_ID) 
 		{
-			app_config.wav_id = wav_id;
-			app_config.wav_port = pjsua_player_get_conf_port(app_config.wav_id);
+			app_config.wav_id[i] = wav_id;
+			app_config.wav_port[i] = pjsua_player_get_conf_port(app_config.wav_id[i]);
 		}
 	}
 
@@ -903,9 +915,9 @@ int cSipAccount::playback()
 		call_conf_slot = ci.media[0].stream.aud.conf_slot;
 
 		/* Stream a file, if desired */
-		if (	app_config.wav_port != PJSUA_INVALID_ID)
+		if (	app_config.wav_port[1] != PJSUA_INVALID_ID)
 		{
-			pjsua_conf_connect(app_config.wav_port, call_conf_slot);
+			pjsua_conf_connect(app_config.wav_port[1], call_conf_slot);
 			connect_sound = PJ_FALSE;
 		}
 	}
@@ -927,11 +939,70 @@ int cSipAccount::stopplayback()
 		call_conf_slot = ci.media[0].stream.aud.conf_slot;
 
 		/* Stream a file, if desired */
-		if (app_config.wav_port != PJSUA_INVALID_ID)
+		if (app_config.wav_port[1] != PJSUA_INVALID_ID)
 		{
-			status = pjsua_conf_disconnect(app_config.wav_port, call_conf_slot);
+			status = pjsua_conf_disconnect(app_config.wav_port[1], call_conf_slot);
 		}
 	}
 
 	return status;
+}
+
+int cSipAccount::startrecord()
+{
+	pj_str_t rec_file;
+	pj_status_t status;
+	pjsua_call_info ci;
+	pjsua_conf_port_id call_conf_slot;
+
+	pjsua_call_get_info(current_call, &ci);
+	call_conf_slot = ci.media[0].stream.aud.conf_slot;
+
+	rec_file = pj_str("./record.wav");
+
+	status = pjsua_recorder_create(&rec_file, 0, NULL, 0, 0, &app_config.rec_id);
+	if (status != PJ_SUCCESS)
+	{
+		return status;
+	}
+	app_config.rec_port = pjsua_recorder_get_conf_port(app_config.rec_id);
+
+	// 
+	status = pjsua_conf_connect(call_conf_slot, app_config.rec_port);
+
+	return status;
+}
+
+int cSipAccount::stoprecord()
+{
+	pj_status_t status;
+	pjsua_call_info ci;
+	pjsua_conf_port_id call_conf_slot;
+
+	pjsua_call_get_info(current_call, &ci);
+	call_conf_slot = ci.media[0].stream.aud.conf_slot;
+	// 
+	status = pjsua_conf_disconnect(call_conf_slot, app_config.rec_port);
+
+	pjsua_recorder_destroy(app_config.rec_id);
+
+	return PJ_SUCCESS;
+}
+
+int cSipAccount::makecall(QString url)
+{
+	pjsua_msg_data msg_data_;
+	pj_str_t tmp;
+
+	char buf_uri[32];
+	strcpy_s(buf_uri, url.toStdString().c_str());
+
+	tmp = pj_str(buf_uri);
+
+	pjsua_msg_data_init(&msg_data_);
+
+	pjsua_call_make_call(current_acc, &tmp, &call_opt, NULL,
+		&msg_data_, &current_call);
+
+	return PJ_SUCCESS;
 }

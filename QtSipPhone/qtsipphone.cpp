@@ -9,13 +9,17 @@ QtSipPhone::QtSipPhone(QWidget *parent)
 
 	connect(ui.actionExit, &QAction::triggered, this, &QtSipPhone::exitApp);
 
-	connect(ui.actionCall1, &QAction::triggered, this, &QtSipPhone::callPhone);
+	connect(ui.action_regcall, &QAction::triggered, this, &QtSipPhone::registerPhone);
 
-	connect(ui.actionCall2, &QAction::triggered, this, &QtSipPhone::callPhone2);
+	connect(ui.action_call, &QAction::triggered, this, &QtSipPhone::callPhone);
 
 	connect(ui.actionPlay, &QAction::triggered, this, &QtSipPhone::playBack);
 
 	connect(ui.actionStop, &QAction::triggered, this, &QtSipPhone::stopPlay);
+
+	connect(ui.action_rec, &QAction::triggered, this, &QtSipPhone::startrecord);
+
+	connect(ui.action_stoprec, &QAction::triggered, this, &QtSipPhone::stoprecord);
 
 	m_sipphone.init_sphone();
 }
@@ -25,14 +29,14 @@ void QtSipPhone::exitApp()
 	exit(0);
 }
 
-void QtSipPhone::callPhone()
+void QtSipPhone::registerPhone()
 {
 	m_sipphone.reg_user(u8"102", u8"192.168.3.11", u8"102");
 }
 
-void QtSipPhone::callPhone2()
+void QtSipPhone::callPhone()
 {
-	m_sipphone.reg_user(u8"100", u8"192.168.3.11", u8"100");
+	m_sipphone.makecall(u8"sip:101@192.168.3.11");
 }
 
 void QtSipPhone::playBack()
@@ -43,4 +47,14 @@ void QtSipPhone::playBack()
 void QtSipPhone::stopPlay()
 {
 	m_sipphone.stopplayback();
+}
+
+void QtSipPhone::startrecord()
+{
+	m_sipphone.startrecord();
+}
+
+void QtSipPhone::stoprecord()
+{
+	m_sipphone.stoprecord();
 }

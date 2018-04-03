@@ -14,13 +14,17 @@ public:
 private:
 	void exitApp();
 
-	void callPhone();
+	void registerPhone();
 
-	void callPhone2();
+	void callPhone();
 
 	void playBack();
 
 	void stopPlay();
+
+	void startrecord();
+
+	void stoprecord();
 	
 private:
 	Ui::QtSipPhoneClass ui;
